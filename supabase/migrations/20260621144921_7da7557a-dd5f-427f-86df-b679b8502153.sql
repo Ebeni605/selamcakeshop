@@ -1,0 +1,1 @@
+-- See /tmp/full_migration.sql; applying inline below

@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Selam Cake Shop</title>
+<meta name="description" content="Artisan cakes handcrafted in Addis — order birthdays, weddings, and celebration cakes from Selam Cake Shop." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:ital,wght@1,500;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EE;
+    --cream-2: #F8FCFA;
+    --choc: #1F3A33;
+    --mint-1: #C0E8D5;
+    --mint-2: #A8DEC4;
+    --mint-3: #88D4B0;
+    --blush-1: #E8C0D3;
+    --blush-2: #D488AC;
+    --peach: #FAC5A3;
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --shadow-sm: 0 2px 12px rgba(46,21,3,.06);
+    --shadow-md: 0 6px 22px rgba(46,21,3,.08);
+  }
+  html, body { background: #2a2320; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: var(--choc);
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-brand { font-family: 'Pacifico', cursive; }
+  .font-serif-it { font-family: 'Playfair Display', serif; font-style: italic; }
+
+  /* Phone canvas */
+  .phone-frame {
+    width: 100%;
+    max-width: 430px;
+    height: 100dvh;
+    margin: 0 auto;
+    background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.35), 0 2px 12px rgba(0,0,0,.2);
+  }
+  @media (min-width: 480px) {
+    body { display: flex; align-items: center; justify-content: center; min-height: 100dvh; }
+    .phone-frame { border-radius: 44px; height: min(100dvh, 900px); }
+  }
+
+  /* Scroll area (below top nav, above bottom bar) */
+  .scroll-area {
+    position: absolute; inset: 0;
+    padding-top: 56px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0));
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+
+  /* Glassy bars */
+  .glass {
+    background: rgba(253, 246, 238, 0.72);
+    backdrop-filter: blur(24px) saturate(1.2);
+  }
+
+  /* Press interaction */
+  .press { transition: transform .18s var(--spring); }
+  .press:active { transform: scale(0.94); }
+  .press-sm:active { transform: scale(0.97); }
+
+  /* Chip */
+  .chip {
+    padding: 8px 16px; border-radius: 999px; font-weight: 600; font-size: 13px;
+    background: linear-gradient(135deg, var(--blush-1), var(--peach));
+    color: var(--choc);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+    transition: all .25s var(--expo);
+  }
+  .chip.active {
+    background: var(--choc); color: var(--cream);
+  }
+
+  /* Category tile */
+  .tile {
+    border-radius: 20px; overflow: hidden; background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: transform .3s var(--spring), box-shadow .3s var(--expo);
+  }
+  .tile:hover { box-shadow: var(--shadow-md); }
+  .tile:active { transform: scale(0.97); }
+
+  .badge-pill {
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    background: rgba(255,255,255,.85); color: var(--choc);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Bottom tab bar */
+  .tabbar-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 8px 14px; border-radius: 14px; color: #7c6b5f;
+    transition: all .3s var(--spring);
+  }
+  .tabbar-item.active {
+    background: var(--choc); color: var(--cream);
+  }
+
+  /* ==== SPLASH ==== */
+  #splash-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, #F9D9D3 0%, #FDF6EE 50%, #FAC5A3 100%);
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .8s var(--expo), visibility .8s var(--expo);
+  }
+  #splash-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  #splash-overlay.exiting { animation: splash-exit .7s var(--expo) forwards; }
+
+  @keyframes splash-exit {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.04); }
+  }
+
+  .splash-stage {
+    position: relative; width: 280px; height: 280px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .blob {
+    position: absolute; top: 50%; left: 50%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F5B8C4, #F0A8B8, #E5533A);
+    opacity: 0.7; filter: blur(6px);
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+  .b1 { width: 72px; height: 72px; animation: blob-morph-1 4s infinite ease-in-out; animation-delay: -0.4s; }
+  .b2 { width: 60px; height: 60px; animation: blob-morph-2 4s infinite ease-in-out; animation-delay: -0.8s; }
+  .b3 { width: 56px; height: 56px; animation: blob-morph-3 4s infinite ease-in-out; animation-delay: -1.2s; }
+  .b4 { width: 48px; height: 48px; animation: blob-morph-4 4s infinite ease-in-out; animation-delay: -1.6s; }
+  .b5 { width: 64px; height: 64px; animation: blob-morph-5 4s infinite ease-in-out; animation-delay: -2.0s; }
+  .b6 { width: 44px; height: 44px; animation: blob-morph-6 4s infinite ease-in-out; animation-delay: -2.4s; }
+  .b7 { width: 52px; height: 52px; animation: blob-morph-7 4s infinite ease-in-out; animation-delay: -2.8s; }
+  .b8 { width: 40px; height: 40px; animation: blob-morph-8 4s infinite ease-in-out; animation-delay: -3.2s; }
+  .b9 { width: 58px; height: 58px; animation: blob-morph-9 4s infinite ease-in-out; animation-delay: -3.6s; }
+
+  @keyframes blob-morph-1 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% + 25px),calc(-50% - 35px)) scale(1.15)}50%{transform:translate(calc(-50% + 45px),calc(-50% + 20px)) scale(0.85)}75%{transform:translate(calc(-50% - 20px),calc(-50% + 30px)) scale(1.1)} }
+  @keyframes blob-morph-2 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% - 40px),calc(-50% + 25px)) scale(0.9)}50%{transform:translate(calc(-50% + 15px),calc(-50% + 40px)) scale(1.2)}75%{transform:translate(calc(-50% + 35px),calc(-50% - 20px)) scale(0.95)} }
+  @keyframes blob-morph-3 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% + 30px),calc(-50% + 30px)) scale(1.1)}50%{transform:translate(calc(-50% - 35px),calc(-50% - 15px)) scale(0.85)}75%{transform:translate(calc(-50% - 15px),calc(-50% + 45px)) scale(1.15)} }
+  @keyframes blob-morph-4 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% - 30px),calc(-50% - 30px)) scale(1.2)}50%{transform:translate(calc(-50% + 40px),calc(-50% - 25px)) scale(0.8)}75%{transform:translate(calc(-50% + 20px),calc(-50% + 35px)) scale(1.05)} }
+  @keyframes blob-morph-5 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% + 55px),calc(-50% + 15px)) scale(0.9)}50%{transform:translate(calc(-50% - 25px),calc(-50% + 40px)) scale(1.15)}75%{transform:translate(calc(-50% - 40px),calc(-50% - 25px)) scale(1)} }
+  @keyframes blob-morph-6 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% + 20px),calc(-50% - 45px)) scale(1.15)}50%{transform:translate(calc(-50% - 40px),calc(-50% + 20px)) scale(0.9)}75%{transform:translate(calc(-50% + 30px),calc(-50% + 30px)) scale(1.1)} }
+  @keyframes blob-morph-7 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% - 25px),calc(-50% + 40px)) scale(0.85)}50%{transform:translate(calc(-50% + 35px),calc(-50% - 30px)) scale(1.2)}75%{transform:translate(calc(-50% - 20px),calc(-50% - 20px)) scale(0.95)} }
+  @keyframes blob-morph-8 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% + 45px),calc(-50% - 20px)) scale(1.1)}50%{transform:translate(calc(-50% - 30px),calc(-50% + 35px)) scale(0.8)}75%{transform:translate(calc(-50% + 15px),calc(-50% + 25px)) scale(1.15)} }
+  @keyframes blob-morph-9 { 0%,100%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(calc(-50% - 45px),calc(-50% - 15px)) scale(0.9)}50%{transform:translate(calc(-50% + 25px),calc(-50% + 45px)) scale(1.2)}75%{transform:translate(calc(-50% + 40px),calc(-50% - 30px)) scale(0.85)} }
+
+  .splash-text {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .splash-word {
+    font-family: 'Pacifico', cursive;
+    font-size: 84px; color: var(--choc);
+    opacity: 0; transform: translateY(24px) scale(0.92);
+    animation: text-reveal 3.5s var(--expo) forwards;
+    text-shadow: 0 4px 20px rgba(46,21,3,.15);
+  }
+  .splash-cap {
+    text-transform: uppercase; letter-spacing: .12em;
+    font-size: 12px; font-weight: 700; color: var(--choc);
+    opacity: 0;
+    animation: text-fade-in 3.5s var(--expo) forwards;
+    animation-delay: .8s;
+  }
+  @keyframes text-reveal {
+    0%   { opacity: 0; transform: translateY(24px) scale(0.92); }
+    40%  { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes text-fade-in {
+    0%,20% { opacity: 0; }
+    100%   { opacity: .8; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blob { animation: none !important; }
+    .splash-word, .splash-cap { animation-duration: .6s !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash-overlay" role="status" aria-label="Loading Selam Cake Shop">
+  <div class="splash-stage">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+    <div class="blob b5"></div>
+    <div class="blob b6"></div>
+    <div class="blob b7"></div>
+    <div class="blob b8"></div>
+    <div class="blob b9"></div>
+    <div class="splash-text">
+      <div class="splash-word">Selam</div>
+      <div class="splash-cap">Cake &nbsp;·&nbsp; Shop</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="phone-frame">
+
+  <!-- Top nav -->
+  <header class="glass absolute top-0 inset-x-0 h-14 z-30 flex items-center justify-between px-5"
+          style="border-bottom: 1px solid rgba(31,58,51,.06)">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-xl flex items-center justify-center"
+           style="background: linear-gradient(135deg,var(--blush-1),var(--peach))">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F3A33" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16"/><path d="M6 21V10a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v11"/><path d="M12 4v3"/><circle cx="12" cy="3" r="1"/></svg>
+      </div>
+      <div class="font-brand text-xl leading-none" style="color: var(--choc)">Selam</div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="press-sm w-10 h-10 rounded-xl flex items-center justify-center" aria-label="Notifications" style="color: var(--choc)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
+      <button class="press-sm w-10 h-10 rounded-xl flex items-center justify-center" aria-label="Profile" style="color: var(--choc)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Scroll body -->
+  <main class="scroll-area">
+
+
+    <!-- Hero -->
+    <section class="mx-4 mt-4 rounded-[28px] p-5 relative overflow-hidden"
+             style="background: linear-gradient(160deg,#C0E8D5,#A8DEC4,#88D4B0); box-shadow: var(--shadow-md)">
+      <div class="flex items-center gap-3">
+        <label class="flex-1 flex items-center gap-2 bg-white rounded-full px-4 h-11 shadow-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F3A33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input id="searchInput" class="flex-1 bg-transparent outline-none text-sm placeholder:text-[#1F3A33]/50" placeholder="Search cakes, flavors…" />
+        </label>
+        <button id="cartBtn" class="press relative w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm" aria-label="Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F3A33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          <span id="cartBadge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center text-white hidden" style="background: var(--blush-2)">0</span>
+        </button>
+      </div>
+
+      <div class="mt-6 pb-2">
+        <div class="font-brand text-[56px] leading-none" style="color: var(--choc)">Selam</div>
+        <p class="font-serif-it text-lg mt-1" style="color: var(--choc)">Handcrafted cakes, made with love in Addis.</p>
+      </div>
+    </section>
+
+    <!-- Category chips -->
+    <div class="mt-5 pl-4 pr-2 flex gap-2 overflow-x-auto no-scrollbar" id="chipRow">
+      <!-- populated by JS -->
+    </div>
+
+    <!-- Featured -->
+    <section class="mt-6" id="featuredSection">
+      <div class="px-5 flex items-end justify-between">
+        <h2 class="font-serif-it text-2xl" style="color: var(--choc)">Featured this week</h2>
+      </div>
+      <div id="featuredRow" class="mt-3 pl-4 pr-2 flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+        <!-- populated by JS -->
+      </div>
+    </section>
+
+    <!-- Category grid -->
+    <section class="mt-8 px-4">
+      <div class="flex items-end justify-between">
+        <h2 class="font-serif-it text-2xl" style="color: var(--choc)">Browse categories</h2>
+        <button class="text-xs font-semibold press-sm" style="color: var(--blush-2)">All →</button>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-4" id="catGrid">
+        <!-- populated by JS -->
+      </div>
+      <div class="h-6"></div>
+    </section>
+
+  </main>
+
+  <!-- Bottom tab bar -->
+  <nav class="glass absolute bottom-0 inset-x-0 z-30 px-3 pt-2"
+       style="padding-bottom: calc(8px + env(safe-area-inset-bottom, 0)); border-top: 1px solid rgba(31,58,51,.06)">
+    <div class="flex items-center justify-around">
+      <button class="tabbar-item active" aria-label="Home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-6h-2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span class="text-[10px] font-semibold">Home</span>
+      </button>
+      <button class="tabbar-item" aria-label="Shop">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-1.5 11a2 2 0 0 1-2 1.8H6.5a2 2 0 0 1-2-1.8z"/><path d="M8 9V6a4 4 0 1 1 8 0v3"/></svg>
+        <span class="text-[10px] font-semibold">Shop</span>
+      </button>
+      <button class="tabbar-item" aria-label="Cart">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 2h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L22 6H5"/></svg>
+        <span class="text-[10px] font-semibold">Cart</span>
+      </button>
+      <button class="tabbar-item" aria-label="Orders">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10h8M8 14h6"/></svg>
+        <span class="text-[10px] font-semibold">Orders</span>
+      </button>
+      <button class="tabbar-item" aria-label="Profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span class="text-[10px] font-semibold">Me</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- Cart / Checkout overlay -->
+<div id="cartOverlay" class="fixed inset-0 z-40 hidden items-end justify-center bg-black/50 sm:items-center">
+  <div class="w-full max-w-[430px] bg-white rounded-t-3xl sm:rounded-3xl shadow-xl overflow-hidden max-h-[92dvh] flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+      <h2 id="cartTitle" class="font-serif-it text-xl" style="color: var(--choc)">Your cart</h2>
+      <button id="cartClose" class="press-sm w-9 h-9 rounded-full flex items-center justify-center" aria-label="Close" style="color: var(--choc)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="cartBody" class="flex-1 overflow-y-auto px-5 py-4"></div>
+    <div id="cartFooter" class="px-5 py-4 border-t border-slate-100"></div>
+  </div>
+</div>
+
+<script>
+  // ----- Supabase REST -----
+  const SUPABASE_URL = 'https://rblnsphheplxmcwegivx.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_fZPA_263i9kghfni4v8FwQ_hZx1-8wD';
+  const sbHeaders = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY };
+
+  const state = {
+    categories: [],
+    featured: [],
+    activeChip: 'all',
+    query: '',
+    cart: [], // { id, name, price, img, qty }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  async function loadData() {
+    try {
+      const [catsRes, itemsRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/shop_categories?select=id,key,title,sub,badge,img&order=sort_order.asc`, { headers: sbHeaders }),
+        fetch(`${SUPABASE_URL}/rest/v1/shop_items?select=id,name,sub,cat,price,img,available&available=eq.true&order=sort_order.asc&limit=8`, { headers: sbHeaders }),
+      ]);
+      state.categories = catsRes.ok ? await catsRes.json() : [];
+      state.featured = itemsRes.ok ? await itemsRes.json() : [];
+    } catch (e) {
+      console.error('Failed to load storefront data', e);
+    }
+    renderAll();
+  }
+
+  function renderAll() { renderChips(); renderGrid(); renderFeatured(); }
+
+  function matches(s) {
+    const q = state.query.trim().toLowerCase();
+    if (!q) return true;
+    return (s.title || s.name || '').toLowerCase().includes(q) ||
+           (s.sub || '').toLowerCase().includes(q);
+  }
+
+  function renderChips() {
+    const filtered = state.categories.filter(matches);
+    const chips = [
+      `<button class="chip press-sm ${state.activeChip === 'all' ? 'active' : ''}" data-key="all">All</button>`,
+      ...filtered.map(c => `<button class="chip press-sm ${state.activeChip === c.key ? 'active' : ''}" data-key="${esc(c.key)}">${esc(c.title)}</button>`),
+      '<span class="w-2 shrink-0"></span>',
+    ];
+    $('chipRow').innerHTML = chips.join('');
+  }
+
+  function renderGrid() {
+    let list = state.categories.filter(matches);
+    if (state.activeChip !== 'all') list = list.filter(c => c.key === state.activeChip);
+    const grid = $('catGrid');
+    if (!list.length) {
+      grid.innerHTML = `<div class="col-span-2 py-10 text-center text-sm text-[#1F3A33]/60">No categories match "${esc(state.query)}".</div>`;
+      return;
+    }
+    grid.innerHTML = list.map(c => `
+      <a href="/categories/${esc(c.key)}" class="tile press text-left block">
+        <div class="relative h-28" style="background: linear-gradient(135deg,#F9D9D3,#E8C0D3)">
+          ${c.img ? `<img src="${esc(c.img)}" alt="${esc(c.title)}" loading="lazy" class="w-full h-full object-cover"/>` : ''}
+          ${c.badge ? `<span class="absolute top-2 left-2 badge-pill">${esc(c.badge)}</span>` : ''}
+        </div>
+        <div class="p-3">
+          <div class="font-serif-it text-base leading-tight">${esc(c.title)}</div>
+          <div class="text-[11px] mt-0.5 text-[#1F3A33]/60">${esc(c.sub || '')}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function renderFeatured() {
+    let list = state.featured.filter(matches);
+    if (state.activeChip !== 'all') list = list.filter(i => i.cat === state.activeChip);
+    const row = $('featuredRow');
+    if (!list.length) {
+      $('featuredSection').style.display = 'none';
+      return;
+    }
+    $('featuredSection').style.display = '';
+    row.innerHTML = list.map(i => `
+      <article class="tile snap-start shrink-0 w-[260px]" data-id="${esc(i.id)}">
+        <div class="relative h-40" style="background: linear-gradient(135deg,#F5D6C8,#FAC5A3)">
+          ${i.img ? `<img src="${esc(i.img)}" alt="${esc(i.name)}" class="w-full h-full object-cover" loading="lazy"/>` : ''}
+        </div>
+        <div class="p-4">
+          <h3 class="font-serif-it text-lg leading-tight">${esc(i.name)}</h3>
+          <p class="text-xs mt-1 text-[#1F3A33]/60">${esc(i.sub || '')}</p>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-sm font-bold" style="color: var(--blush-2)">ETB ${Number(i.price || 0).toFixed(0)}</span>
+            <button class="add-btn press w-8 h-8 rounded-full flex items-center justify-center" style="background: var(--choc); color: var(--cream)" aria-label="Add ${esc(i.name)}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+      </article>
+    `).join('') + '<span class="w-2 shrink-0"></span>';
+  }
+
+  // ----- Cart -----
+  function cartCount() { return state.cart.reduce((n, x) => n + x.qty, 0); }
+  function cartTotal() { return state.cart.reduce((n, x) => n + x.qty * Number(x.price || 0), 0); }
+
+  function updateBadge() {
+    const n = cartCount();
+    const b = $('cartBadge');
+    b.textContent = n;
+    b.classList.toggle('hidden', n === 0);
+  }
+
+  function addToCart(item) {
+    const found = state.cart.find(x => x.id === item.id);
+    if (found) found.qty += 1;
+    else state.cart.push({ id: item.id, name: item.name, price: Number(item.price || 0), img: item.img || null, cat: item.cat, qty: 1 });
+    updateBadge();
+    openCart();
+  }
+
+  function changeQty(id, delta) {
+    const it = state.cart.find(x => x.id === id);
+    if (!it) return;
+    it.qty += delta;
+    if (it.qty <= 0) state.cart = state.cart.filter(x => x.id !== id);
+    updateBadge();
+    renderCart();
+  }
+
+  function openCart() { $('cartOverlay').classList.remove('hidden'); $('cartOverlay').classList.add('flex'); renderCart(); }
+  function closeCart() { $('cartOverlay').classList.add('hidden'); $('cartOverlay').classList.remove('flex'); }
+
+  function renderCart() {
+    const body = $('cartBody');
+    const footer = $('cartFooter');
+    if (!state.cart.length) {
+      $('cartTitle').textContent = 'Your cart';
+      body.innerHTML = `<div class="py-12 text-center text-sm text-[#1F3A33]/60">Your cart is empty.<br/>Tap the <b>+</b> on a cake to add it.</div>`;
+      footer.innerHTML = `<button id="cartCloseBtn" class="w-full py-3 rounded-full font-semibold" style="background:#f4ece2;color:var(--choc)">Continue browsing</button>`;
+      $('cartCloseBtn').onclick = closeCart;
+      return;
+    }
+    $('cartTitle').textContent = `Your cart (${cartCount()})`;
+    body.innerHTML = `
+      <div class="space-y-3">
+        ${state.cart.map(x => `
+          <div class="flex items-center gap-3 rounded-2xl p-2" style="background:#faf5ed">
+            <div class="w-14 h-14 rounded-xl overflow-hidden bg-white flex items-center justify-center text-2xl">
+              ${x.img ? `<img src="${esc(x.img)}" alt="" class="w-full h-full object-cover"/>` : '🎂'}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-sm truncate">${esc(x.name)}</div>
+              <div class="text-xs" style="color: var(--blush-2)">ETB ${Number(x.price).toFixed(0)}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button data-qty="-1" data-id="${esc(x.id)}" class="w-7 h-7 rounded-full bg-white text-lg leading-none">−</button>
+              <span class="text-sm font-semibold w-5 text-center">${x.qty}</span>
+              <button data-qty="1" data-id="${esc(x.id)}" class="w-7 h-7 rounded-full bg-white text-lg leading-none">+</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <form id="checkoutForm" class="mt-5 space-y-3">
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-[#1F3A33]/60">Full name</label>
+          <input required maxlength="100" name="name" class="mt-1 w-full h-11 px-3 rounded-xl border border-slate-200 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-[#1F3A33]/60">Phone</label>
+          <input required maxlength="30" name="phone" type="tel" class="mt-1 w-full h-11 px-3 rounded-xl border border-slate-200 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-[#1F3A33]/60">Delivery date</label>
+          <input required type="date" name="date" min="${new Date().toISOString().slice(0,10)}" class="mt-1 w-full h-11 px-3 rounded-xl border border-slate-200 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-[#1F3A33]/60">Address (optional)</label>
+          <textarea name="address" maxlength="250" rows="2" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none text-sm"></textarea>
+        </div>
+        <div id="checkoutError" class="hidden text-xs text-red-600"></div>
+      </form>
+    `;
+    body.querySelectorAll('[data-qty]').forEach(btn => {
+      btn.addEventListener('click', () => changeQty(btn.dataset.id, Number(btn.dataset.qty)));
+    });
+    footer.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs text-[#1F3A33]/60">Total</span>
+        <span class="font-bold text-lg" style="color: var(--choc)">ETB ${cartTotal().toFixed(0)}</span>
+      </div>
+      <button id="placeOrderBtn" class="w-full py-3 rounded-full font-semibold text-white" style="background: var(--choc)">Place order</button>
+    `;
+    $('placeOrderBtn').onclick = placeOrder;
+  }
+
+  async function placeOrder() {
+    const form = $('checkoutForm');
+    const err = $('checkoutError');
+    err.classList.add('hidden');
+    if (!form.reportValidity()) return;
+    const fd = new FormData(form);
+    const btn = $('placeOrderBtn');
+    btn.disabled = true; btn.textContent = 'Placing…';
+    try {
+      const first = state.cart[0];
+      const catObj = first ? state.categories.find(c => c.key === first.cat) : null;
+      const res = await fetch('/api/public/orders', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: fd.get('name'),
+          customer_phone: fd.get('phone'),
+          customer_address: fd.get('address') || '',
+          delivery_date: fd.get('date'),
+          items: state.cart.map(x => ({ name: x.name, qty: x.qty, price: x.price, img: x.img || undefined })),
+          total: cartTotal(),
+          cake_id: first ? first.id : null,
+          category_id: catObj ? catObj.id : null,
+        }),
+      });
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b?.error || 'Could not place order');
+      }
+      const b = await res.json();
+      state.cart = [];
+      updateBadge();
+      $('cartTitle').textContent = 'Order received';
+      $('cartBody').innerHTML = `
+        <div class="py-8 text-center">
+          <div class="text-5xl">🎉</div>
+          <div class="mt-3 font-serif-it text-xl" style="color: var(--choc)">Thank you!</div>
+          <div class="mt-2 text-sm text-[#1F3A33]/70">Order <span class="font-mono font-bold">#${String(b.id || '').slice(0,8).toUpperCase()}</span></div>
+          <div class="text-xs text-[#1F3A33]/60 mt-1">We'll call you shortly to confirm.</div>
+        </div>`;
+      $('cartFooter').innerHTML = `<button id="doneBtn" class="w-full py-3 rounded-full font-semibold text-white" style="background: var(--choc)">Done</button>`;
+      $('doneBtn').onclick = closeCart;
+    } catch (e) {
+      err.textContent = e.message || 'Something went wrong';
+      err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Place order';
+    }
+  }
+
+  // ----- Events -----
+  $('chipRow').addEventListener('click', (e) => {
+    const t = e.target.closest('.chip'); if (!t) return;
+    state.activeChip = t.dataset.key || 'all';
+    renderAll();
+  });
+
+  $('featuredRow').addEventListener('click', (e) => {
+    const btn = e.target.closest('.add-btn'); if (!btn) return;
+    const art = btn.closest('article'); if (!art) return;
+    const id = art.dataset.id;
+    const item = state.featured.find(x => String(x.id) === String(id));
+    if (item) addToCart(item);
+  });
+
+  $('cartBtn').addEventListener('click', openCart);
+  $('cartClose').addEventListener('click', closeCart);
+  $('cartOverlay').addEventListener('click', (e) => { if (e.target === $('cartOverlay')) closeCart(); });
+
+  let searchT;
+  $('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchT);
+    searchT = setTimeout(() => { state.query = e.target.value; renderAll(); }, 100);
+  });
+
+  loadData();
+
+  // ----- Splash removal -----
+  const MIN_DISPLAY_MS = 1200;
+  const startedAt = performance.now();
+  function hideSplash() {
+    const el = document.getElementById('splash-overlay');
+    if (!el) return;
+    const elapsed = performance.now() - startedAt;
+    const wait = Math.max(0, MIN_DISPLAY_MS - elapsed);
+    setTimeout(() => {
+      el.classList.add('exiting');
+      setTimeout(() => el.classList.add('hidden'), 700);
+    }, wait);
+  }
+  if (document.readyState === 'complete') hideSplash();
+  else window.addEventListener('load', hideSplash);
+</script>
+</body>
+</html>

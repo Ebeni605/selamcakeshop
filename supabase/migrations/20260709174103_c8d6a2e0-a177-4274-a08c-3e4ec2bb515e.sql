@@ -1,0 +1,1 @@
+ALTER TABLE public.shop_items ALTER COLUMN cat DROP DEFAULT;
